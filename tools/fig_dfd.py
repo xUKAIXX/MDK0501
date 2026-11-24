@@ -14,44 +14,48 @@ def dfd_example_context():
     e2 = dfd_external(c, 106, 46, 34, 12, "2  Студенты")
     p = dfd_process(c, 66, 30, 32, 24, "1", "Выполнить\nкурсовую работу")
 
-    c.arrow([e1["r"], (50, 28), (50, 36), p["l"]], label="Задание", size=7.4,
+    c.flow([e1["r"], (50, 28), (50, 36), p["l"]], label="Задание", size=7.4,
             label_at=(57, 25))
-    c.arrow([p["b"], (82, 62), (27, 62), (27, e1["b"][1])], head="filled")
+    c.flow([p["b"], (82, 62), (27, 62), (27, e1["b"][1])], head="filled")
     c.text(30, 66, "Курсовая работа", size=7.4, ha="left")
-    c.arrow([e2["l"], p["r"]], label="Пояснительная\nзаписка", size=7.0,
+    c.flow([e2["l"], p["r"]], label="Пояснительная\nзаписка", size=7.0,
             label_at=(108, 34), label_ha="left")
     return c.save("dfd_example_context")
 
 
 def dfd_example_level1():
-    """Диаграмма декомпозиции DFD из методических указаний: процессы 1–3,
-    накопители D1–D3, граничные потоки «Задание», «Курсовая работа»,
-    «Пояснительная записка»."""
-    c = Canvas(170, 86)
-    p1 = dfd_process(c, 34, 28, 34, 22, "1", "Подобрать\nлитературу")
-    p2 = dfd_process(c, 88, 28, 34, 22, "2", "Оформить ПЗ")
-    p3 = dfd_process(c, 136, 46, 30, 20, "3", "Защитить\nкурсовую работу")
-    s1 = dfd_store(c, 22, 6, 42, 9, "D1", "Список литературы")
-    s2 = dfd_store(c, 84, 6, 44, 9, "D2", "Методические указания")
-    s3 = dfd_store(c, 88, 70, 42, 9, "D3", "Положение о КП")
+    """DFD уровня 1 из методических указаний: процессы «Сделать расчёты»,
+    «Сделать графическую часть», «Получить консультацию», накопитель
+    «Методические указания», потоки «Правила оформления», «Расчёты»,
+    «Графическая часть», «Пояснительная записка»."""
+    c = Canvas(170, 88)
+    st = dfd_store(c, 100, 6, 62, 9, "Б", "Методические указания")
+    p1 = dfd_process(c, 22, 34, 40, 24, "1", "Сделать\nрасчёты")
+    p2 = dfd_process(c, 88, 34, 44, 24, "2", "Сделать\nграфическую часть")
+    p3 = dfd_process(c, 88, 66, 44, 18, "3", "Получить\nконсультацию")
 
-    c.arrow([s1["b"], p1["t"]], label="Литература", size=6.4,
-            label_at=(22, 20), label_ha="left")
-    c.arrow([s2["b"], p2["t"]])
-    c.arrow([p1["r"], p2["l"]], label="Подобранная\nлитература", size=6.4,
-            label_at=(78, 24))
-    c.arrow([p2["r"], p3["l"]], label="Пояснительная\nзаписка", size=6.4,
-            label_at=(140, 33), label_ha="left")
-    c.arrow([p2["b"], s3["t"]], label="Правила\nоформления", size=6.2,
-            label_at=(109, 56), label_ha="left")
-
-    # граничные потоки, перенесённые с контекстной диаграммы
-    c.arrow([(2, 34), p1["l"]], head="filled")
-    c.text(4, 30, "Задание", size=6.4, ha="left")
-    c.arrow([p1["l"], (2, 44)], head="filled")
-    c.text(4, 48, "Курсовая работа", size=6.4, ha="left")
-    c.arrow([p3["r"], (168, p3["r"][1])], head="filled")
-    c.text(140, 70, "Готовая ПЗ\n(защита)", size=6.2, ha="left")
+    # входной поток от предыдущего уровня
+    c.flow([(2, 44), p1["l"]], label="Подобранная\nлитература", size=6.2,
+           label_at=(6, 34), label_ha="left")
+    # управление: правила оформления из накопителя
+    c.flow([(st["l"][0] + 4, st["b"][1]), (p1["t"][0] + 6, 20),
+            (p1["t"][0] + 6, p1["t"][1])],
+           label="Правила\nоформления", size=6.0, label_at=(66, 15),
+           label_va="bottom")
+    c.flow([(st["l"][0] + 4, st["b"][1]), p2["t"]], head="filled")
+    # потоки между процессами
+    c.flow([p1["r"], p2["l"]], label="Расчёты", size=6.2,
+           label_at=(80, 30), label_va="bottom")
+    c.flow([p2["b"], p3["t"]], label="Графическая\nчасть", size=6.0,
+           label_at=(p2["b"][0] + 4, 62), label_ha="left", label_va="bottom")
+    # пояснительная записка — выход
+    c.flow([p3["r"], (168, p3["r"][1])], label="Пояснительная\nзаписка",
+           size=6.2, label_at=(150, 78), label_ha="right", label_va="top")
+    # замечания из накопителя в консультацию
+    c.flow([(st["r"][0] - 6, st["b"][1]), (p3["r"][0] + 6, p3["t"][1] + 2),
+            (p3["r"][0] - 2, p3["r"][1])],
+           label="Замечания,\nдополнения", size=6.0, label_at=(152, 36),
+           label_ha="right")
     return c.save("dfd_example_level1")
 
 
@@ -65,17 +69,17 @@ def dfd_variant_context():
     e3 = dfd_external(c, 124, 40, 34, 11, "ФНС,\nРосстат")
     st = dfd_store(c, 60, 76, 40, 10, "D1", "База объектов и заявок")
 
-    c.arrow([e1["r"], (p["l"][0], 40)], label="Заявка на объект",
+    c.flow([e1["r"], (p["l"][0], 40)], label="Заявка на объект",
             size=6.4, label_at=(46, 22), label_bg="#ffffff")
-    c.arrow([e2["r"], (p["l"][0], 54)], label="Заявка на подбор",
+    c.flow([e2["r"], (p["l"][0], 54)], label="Заявка на подбор",
             size=6.4, label_at=(46, 60), label_bg="#ffffff")
-    c.arrow([p["r"], e3["l"]], label="Отчётность", size=6.4,
+    c.flow([p["r"], e3["l"]], label="Отчётность", size=6.4,
             label_at=(113, 40), label_bg="#ffffff")
     # процесс → хранилище и хранилище → процесс: обе стрелки бьют в границу
-    c.arrow([(p["cx"] - 6, p["b"][1]), (st["cx"] - 7, st["t"][1])],
+    c.flow([(p["cx"] - 6, p["b"][1]), (st["cx"] - 7, st["t"][1])],
             label="Данные объекта", size=6.2, label_at=(70, 70),
             label_bg="#ffffff")
-    c.arrow([(st["cx"] + 7, st["t"][1]), (p["cx"] + 6, p["b"][1])],
+    c.flow([(st["cx"] + 7, st["t"][1]), (p["cx"] + 6, p["b"][1])],
             label="Подборки", size=6.2, label_at=(98, 70), label_bg="#ffffff")
     return c.save("dfd_variant_context")
 
@@ -99,29 +103,29 @@ def dfd_variant_level1():
     d2 = dfd_store(c, 108, 45, 32, 8, "D2", "Заявки")
 
     # внешние сущности
-    c.arrow([e1["r"], p1["l"]], label="Заявка", size=5.8, label_at=(37, 27),
+    c.flow([e1["r"], p1["l"]], label="Заявка", size=5.8, label_at=(37, 27),
             label_bg="#ffffff")
-    c.arrow([e2["r"], p3["l"]], label="Заявка\nна подбор", size=5.6,
+    c.flow([e2["r"], p3["l"]], label="Заявка\nна подбор", size=5.6,
             label_at=(37, 75), label_bg="#ffffff")
     # основная цепочка процессов
-    c.arrow([p1["r"], p2["l"]], label="Карточка\nобъекта", size=5.6,
+    c.flow([p1["r"], p2["l"]], label="Карточка\nобъекта", size=5.6,
             label_at=(94, 25), label_bg="#ffffff")
-    c.arrow([p3["r"], p4["l"]], label="Варианты", size=5.8, label_at=(94, 75),
+    c.flow([p3["r"], p4["l"]], label="Варианты", size=5.8, label_at=(94, 75),
             label_bg="#ffffff")
-    c.arrow([p4["r"], (168, p4["r"][1]), (168, p5["b"][1])],
+    c.flow([p4["r"], (168, p4["r"][1]), (168, p5["b"][1])],
             label="Договор, акт", size=5.6, label_at=(168, 82), label_bg="#ffffff")
-    c.arrow([p5["t"], e3["b"]], label="Отчёты", size=5.8, label_at=(171, 31),
+    c.flow([p5["t"], e3["b"]], label="Отчёты", size=5.8, label_at=(171, 31),
             label_ha="left", label_bg="#ffffff")
     # хранилища
-    c.arrow([(60, p1["b"][1]), (60, d1["t"][1])], label="Объект", size=5.6,
+    c.flow([(60, p1["b"][1]), (60, d1["t"][1])], label="Объект", size=5.6,
             label_at=(63, 41), label_ha="left", label_bg="#ffffff")
-    c.arrow([(p2["b"][0] - 4, p2["b"][1]), (80, d1["t"][1])],
+    c.flow([(p2["b"][0] - 4, p2["b"][1]), (80, d1["t"][1])],
             label="Цена", size=5.6, label_at=(92, 41), label_bg="#ffffff")
-    c.arrow([(56, d1["b"][1]), (56, p3["t"][1])], label="Объекты", size=5.6,
+    c.flow([(56, d1["b"][1]), (56, p3["t"][1])], label="Объекты", size=5.6,
             label_at=(59, 58), label_ha="left", label_bg="#ffffff")
-    c.arrow([(124, d2["t"][1]), (124, p2["b"][1])], label="Заявки", size=5.6,
+    c.flow([(124, d2["t"][1]), (124, p2["b"][1])], label="Заявки", size=5.6,
             label_at=(127, 41), label_ha="left", label_bg="#ffffff")
-    c.arrow([(120, p4["t"][1]), (120, d2["b"][1])], label="Запрос", size=5.6,
+    c.flow([(120, p4["t"][1]), (120, d2["b"][1])], label="Запрос", size=5.6,
             label_at=(117, 58), label_ha="right", label_bg="#ffffff")
     c.text(c.w / 2, c.h - 4, "Потоки данных согласованы с контекстной диаграммой "
                              "(балансировка)", size=7, italic=True)

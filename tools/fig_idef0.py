@@ -11,7 +11,8 @@ def idef0_chain(c, blocks, w=22, h=21, y=42, gap=11, x0=28, title="", code="",
                 num="", flow_labels=(), controls=(), mechs=(), inputs=(),
                 outputs=(), extra=(), block_size=7.6):
     """Ряд функциональных блоков IDEF0 с подписями дуг по нотации."""
-    idef0_frame(c, code, title, num)
+    fr = idef0_frame(c, code, title, num)
+    head = fr["top"] + 1.0
     xs = [x0 + i * (w + gap) for i in range(len(blocks))]
     pts = []
     for (cd, nm), x in zip(blocks, xs):
@@ -40,16 +41,16 @@ def idef0_chain(c, blocks, w=22, h=21, y=42, gap=11, x0=28, title="", code="",
         if not lab:
             continue
         p = pts[i]
-        c.arrow([(p["ctl"][0], 6), (p["ctl"][0], y)])
-        c.text(p["ctl"][0] + 2.4, 25, lab, size=5.9, ha="left", wrap=18,
-               va="bottom")
+        c.arrow([(p["ctl"][0], head), (p["ctl"][0], y)])
+        c.text(p["ctl"][0] + 2.4, head + 1.5, lab, size=5.9, ha="left", wrap=18,
+               va="top")
 
     for i, lab in enumerate(mechs):
         if not lab:
             continue
         p = pts[i]
         c.arrow([(p["mech"][0], c.h - 16), (p["mech"][0], y + h)])
-        c.text(p["mech"][0] + 2.4, c.h - 26, lab, size=5.9, ha="left", wrap=16,
+        c.text(p["mech"][0] + 2.4, y + h + 4, lab, size=5.9, ha="left", wrap=16,
                va="top")
 
     for (txt, xx, yy) in extra:
@@ -74,12 +75,12 @@ def idef0_example_context():
             label_at=(21, 57), label_dy=-2.2)
 
     # управления (верхняя грань)
-    c.arrow([(56, 2), (56, b["t"][1])],
-            label="Методические указания", size=7.4, label_at=(57, 11),
-            label_ha="left")
-    c.arrow([(95, 2), (95, b["t"][1])],
+    c.arrow([(56, 11), (56, b["t"][1])],
+            label="Методические указания", size=7.4, label_at=(57, 13),
+            label_ha="left", label_va="top")
+    c.arrow([(95, 11), (95, b["t"][1])],
             label="Положение о курсовом\nпроектировании", size=7.4,
-            label_at=(96, 9), label_ha="left")
+            label_at=(96, 13), label_ha="left", label_va="top")
 
     # выходы (правая грань)
     c.arrow([(b["r"][0], 45), (148, 45)], label="Курсовая работа", size=7.4,

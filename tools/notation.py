@@ -28,6 +28,9 @@ THEME_FILL = "#eef6ff"
 THEME_LINE = "#384c6b"
 THEME_TEXT = "#384c6b"
 LW = 0.9
+# цвета потоков DFD (Ramus красит каждый поток своим цветом)
+FLOW_COLORS = ["#c0179b", "#e87722", "#1f9bd1", "#5f9b1f", "#d4a017",
+               "#8e44ad", "#0f8b8d"]
 # холст печатается в ширину 16,2 см, поэтому кегль уменьшается до печатного
 FONT_SCALE = 0.78
 
@@ -120,7 +123,7 @@ class Canvas:
     def arrow(self, pts, head="filled", color=None, lw=LW, ls="-",
               label=None, label_at=None, label_dx=0, label_dy=0, size=8,
               label_ha="center", label_va="center", double=False, zorder=2,
-              radius=None, curve=None, label_bg=None):
+              radius=None, curve=None, label_bg=None, label_color=None):
         """Ломаная со стрелкой на конце. pts — список (x, y)."""
         color = color or THEME_LINE
         pts = [tuple(map(float, p)) for p in pts]
@@ -142,7 +145,14 @@ class Canvas:
                 lx, ly = label_at
             self.text(lx + label_dx, ly + label_dy, label, size=size,
                       ha=label_ha, va=label_va, zorder=zorder + 4,
-                      bg=label_bg)
+                      bg=label_bg, color=label_color or color)
+
+    def flow(self, pts, **kw):
+        """Поток данных DFD: каждый поток своим цветом (как в Ramus)."""
+        i = getattr(self, "_flow_i", 0)
+        self._flow_i = i + 1
+        kw.setdefault("color", FLOW_COLORS[i % len(FLOW_COLORS)])
+        return self.arrow(pts, **kw)
 
     def _curved(self, pts, head, color, lw, ls, zorder, curve):
         t = [i / 40 for i in range(41)]
@@ -287,32 +297,76 @@ def idef0_block(c, x, y, w, h, code, name, size=8.5, num_size=8, wrap=20):
     }
 
 
-def idef0_frame(c, code="", title="", num=""):
-    """Рамка листа IDEF0 (поле заголовка внизу)."""
-    c.rect(1, 1, c.w - 2, c.h - 2, lw=1.2, fc="none", zorder=0)
-    c.rect(1, c.h - 8, c.w - 2, 7, lw=1.0, fc="none", zorder=0)
-    c.ax.plot([c.w * 0.55, c.w * 0.55], [c.h - 8, c.h - 1], color=THEME_LINE, lw=0.8,
+def idef0_frame(c, code="", title="", num="", author="Студент группы ИС-31",
+                project="Агентство недвижимости", date="01.11.2026"):
+    """Рамка листа IDEF0/DFD как в Ramus: шапка с полями проекта и строка
+    заголовка внизу (ВЕТКА / НАЗВАНИЕ / НОМЕР)."""
+    W, H = c.w, c.h
+    top, bot = 10.0, 5.0
+    L, R = 1.0, W - 1.0
+    # внешний контур листа
+    c.rect(L, 1, W - 2, H - 2, lw=1.1, fc="none", zorder=0)
+    # шапка
+    c.rect(L, 1, W - 2, top - 1, lw=0.9, fc="none", zorder=0)
+    left_col = 20.0                     # колонка «ИСПОЛЬЗУЕТСЯ В:»
+    c.ax.plot([L + left_col, L + left_col], [1, top], color=THEME_LINE, lw=0.7,
               zorder=0)
-    c.ax.plot([c.w * 0.62, c.w * 0.62], [c.h - 8, c.h - 1], color=THEME_LINE, lw=0.8,
-              zorder=0)
-    c.text(c.w * 0.28, c.h - 4.5, title, size=8, zorder=1)
-    c.text(c.w * 0.585, c.h - 2.6, "УЗЕЛ:", size=6)
-    c.text(c.w * 0.585, c.h - 5.4, "НОМЕР:", size=6)
-    c.text(c.w * 0.64, c.h - 4.5, code, size=11, bold=True)
-    c.text(c.w * 0.8, c.h - 4.5, num, size=8)
+    c.text(L + left_col / 2, 4.2, "ИСПОЛЬЗУЕТСЯ В:", size=5.0)
+    c.text(L + left_col / 2, 7.2, "ДГТУ", size=5.4)
+    x0 = L + left_col
+    # три строки шапки
+    row_h = (top - 1) / 3.0
+    for i in (1, 2):
+        c.ax.plot([x0, R], [1 + row_h * i, 1 + row_h * i], color=THEME_LINE,
+                  lw=0.7, zorder=0)
+    # правый столбец «КОНТЕКСТ:»
+    ctx_w = 26.0
+    xc = R - ctx_w
+    c.ax.plot([xc, xc], [1, top - 1 - row_h], color=THEME_LINE, lw=0.7, zorder=0)
+    c.text(xc + 2, 2.6, "КОНТЕКСТ:", size=5.0, ha="left")
+    c.rect(xc + 8, 3.9, ctx_w - 10, 2.2, lw=0.7, zorder=1)
+    c.text(xc + 8 + (ctx_w - 10) / 2, 5.0, "ВЕРХ", size=5.2)
+    # колонки средних строк
+    xa = x0 + (xc - x0) * 0.30          # АВТОР / ПРОЕКТ
+    xb = x0 + (xc - x0) * 0.52          # ДАТА / РЕВИЗИЯ
+    xd = x0 + (xc - x0) * 0.78          # РАЗРАБАТЫВАЕТСЯ
+    for x in (xa, xb, xd):
+        c.ax.plot([x, x], [1, top - 1 - row_h], color=THEME_LINE, lw=0.7, zorder=0)
+    r1, r2 = 1 + row_h * 0.5, 1 + row_h * 1.5
+    c.text(x0 + 1.2, r1, "АВТОР:  " + author, size=5.0, ha="left")
+    c.text(xa + 1.2, r1, "ДАТА:  " + date, size=5.0, ha="left")
+    c.text(xd + 1.2, r1, "РАЗРАБАТЫВАЕТСЯ", size=5.0, ha="left")
+    c.text(x0 + 1.2, r2, "ПРОЕКТ:  " + project, size=5.0, ha="left")
+    c.text(xa + 1.2, r2, "РЕВИЗИЯ:  " + date, size=5.0, ha="left")
+    c.text(xd + 1.2, r2, "ЧЕРНОВИК", size=5.0, ha="left")
+    r3 = 1 + row_h * 2.5
+    c.text(x0 + 1.2, r3, "ЗАМЕЧАНИЯ: 1 2 3 4 5 6 7 8 9 10", size=5.0, ha="left")
+    c.text(xa + 1.2, r3, "РЕКОМЕНДОВАНО", size=5.0, ha="left")
+    c.text(xd + 1.2, r3, "ПУБЛИКАЦИЯ", size=5.0, ha="left")
+    # нижняя строка заголовка
+    c.rect(L, H - bot - 1, W - 2, bot, lw=0.9, fc="none", zorder=0)
+    b1 = L + (W - 2) * 0.17
+    b2 = L + (W - 2) * 0.62
+    for x in (b1, b2):
+        c.ax.plot([x, x], [H - bot - 1, H - 1], color=THEME_LINE, lw=0.7, zorder=0)
+    c.text(L + 1.5, H - bot / 2 - 1, "ВЕТКА:  " + code, size=5.6, ha="left")
+    c.text(b1 + 1.5, H - bot / 2 - 1, "НАЗВАНИЕ:", size=5.6, ha="left")
+    c.text(b1 + 14, H - bot / 2 - 1, title, size=6.0, ha="left")
+    c.text(b2 + 1.5, H - bot / 2 - 1, "НОМЕР:", size=5.6, ha="left")
+    c.text(b2 + 12, H - bot / 2 - 1, num, size=6.4, ha="left")
+    return {"top": top, "bot": H - bot - 1}
 
 
 # ============================================================================
 # DFD
 # ============================================================================
 def dfd_process(c, x, y, w, h, num, name, size=8.5):
-    """Процесс DFD в нотации Гейна-Сарсона: скруглённый прямоугольник
-    с полосой номера сверху."""
-    c.rect(x, y, w, h, rounded=1.6)
-    c.ax.plot([x + 0.6, x + w - 0.6], [y + 5.2, y + 5.2], color=THEME_LINE, lw=0.8,
-              zorder=3)
-    c.text(x + w / 2, y + 2.6, num, size=7.5)
-    fit_label(c, x + w / 2, y + 5.2 + (h - 5.2) / 2, name, w - 4.0, size=size)
+    """Процесс DFD (Гейн-Сарсон, Ramus): эллипс с номером в правом нижнем
+    углу — так процессы нарисованы в методических указаниях."""
+    c.ellipse(x, y, w, h)
+    fit_label(c, x + w / 2, y + h / 2 - 1.2, name, w - 13.0, size=size)
+    c.text(x + w / 2 + (w / 2 - 6) * 0.72, y + h / 2 + (h / 2 - 4) * 0.62,
+           num, size=8.4, ha="right")
     return {"cx": x + w / 2, "cy": y + h / 2,
             "l": (x, y + h / 2), "r": (x + w, y + h / 2),
             "t": (x + w / 2, y), "b": (x + w / 2, y + h),
@@ -321,12 +375,10 @@ def dfd_process(c, x, y, w, h, num, name, size=8.5):
 
 def dfd_store(c, x, y, w, h, sid, name, size=8.5):
     """Накопитель данных в нотации Гейна-Сарсона: открытый слева прямоугольник."""
-    c.ax.plot([x, x + w, x + w, x, x],
-              [y, y, y + h, y + h, y], color=THEME_LINE, lw=1.0, zorder=3,
-              solid_capstyle="butt")
-    c.ax.plot([x + 11, x + 11], [y, y + h], color=THEME_LINE, lw=0.9, zorder=3)
+    c.rect(x, y, w, h, lw=1.0)
+    c.ax.plot([x + 11, x + 11], [y, y + h], color=THEME_LINE, lw=0.9, zorder=4)
     c.text(x + 5.5, y + h / 2, sid, size=7.5)
-    c.text(x + 11 + (w - 11) / 2, y + h / 2, name, size=size, wrap=14)
+    fit_label(c, x + 11 + (w - 11) / 2, y + h / 2, name, w - 15.0, size=size)
     return {"l": (x, y + h / 2), "r": (x + w, y + h / 2),
             "t": (x + w / 2, y), "b": (x + w / 2, y + h),
             "cx": x + w / 2, "cy": y + h / 2}
@@ -334,7 +386,7 @@ def dfd_store(c, x, y, w, h, sid, name, size=8.5):
 
 def dfd_external(c, x, y, w, h, name, size=8.5):
     c.rect(x, y, w, h)
-    c.text(x + w / 2, y + h / 2, name, size=size, wrap=14)
+    fit_label(c, x + w / 2, y + h / 2, name, w - 4.0, size=size)
     return {"l": (x, y + h / 2), "r": (x + w, y + h / 2),
             "t": (x + w / 2, y), "b": (x + w / 2, y + h)}
 
