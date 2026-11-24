@@ -5,7 +5,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-ASSETS = os.path.join(ROOT, "reports", "assets")
+ASSETS = os.path.join(ROOT, "reports", "отчёт")
 
 EXAMPLES = [
     ("idef0_example_context", "IDEF0 · контекст A-0 (пример)"),
@@ -97,7 +97,7 @@ def sheet(items, title, out):
 
 
 if __name__ == "__main__":
-    out_dir = os.path.join(ROOT, "reports")
+    out_dir = ASSETS
     sheet(EXAMPLES, "Схемы: примеры из методических указаний",
           os.path.join(out_dir, "предпросмотр_1_примеры.png"))
     sheet(VARIANTS, "Схемы: вариант 3 «Агентство недвижимости»",

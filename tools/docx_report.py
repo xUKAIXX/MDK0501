@@ -17,8 +17,8 @@ from docx.oxml.ns import qn
 from docx.shared import Cm, Pt, RGBColor
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ASSETS = os.path.join(ROOT, "reports", "assets")
-OUT = os.path.join(ROOT, "reports")
+ASSETS = os.path.join(ROOT, "reports", "отчёт")
+OUT = os.path.join(ROOT, "reports", "сделано")
 
 FONT = "Times New Roman"
 MAX_IMAGE_CM = 16.2
