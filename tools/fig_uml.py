@@ -334,21 +334,21 @@ def activity_example():
     # [нет] — влево на «Вернуть на доработку», затем возврат к «Принять заявку»
     c.arrow([d1["l"], a2["t"]], head="filled")
     c.text(33, 32, "[нет]", size=6.6)
-    c.arrow([a2["l"], (4, a2["l"][1]), (4, 15), (28, 15), (28, a1["t"][1])],
+    c.arrow([a2["l"], (4, a2["l"][1]), (4, a1["l"][1]), a1["l"]],
             head="filled")
     # [да] — дальше к полосе fork
     c.arrow([d1["b"], (52, f1["t"][1])])
     c.text(57, 50, "[да]", size=6.6, ha="left")
     c.arrow([f1["l"], (27, f1["l"][1]), a3["t"]], head="none")
     c.arrow([f1["r"], (77, f1["r"][1]), a4["t"]], head="none")
-    c.arrow([a3["b"], (27, j1["l"][1])], head="none")
-    c.arrow([a4["b"], (77, j1["r"][1])], head="none")
+    c.arrow([a3["b"], (27, j1["l"][1]), j1["l"]], head="none")
+    c.arrow([a4["b"], (77, j1["r"][1]), j1["r"]], head="none")
     c.arrow([(52, j1["b"][1]), a5["t"]])
     c.arrow([a5["b"], (52, d2["t"][1])])
     c.arrow([d2["l"], (40, d2["l"][1]), (40, 107), (24, 107), (24, a6["t"][1])],
             head="filled")
     c.text(28, 100, "[да]", size=6.6)
-    c.arrow([a6["l"], (4, a6["l"][1]), (4, 91), (28, 91), (28, a5["l"][1])],
+    c.arrow([a6["l"], (4, a6["l"][1]), (4, a5["l"][1]), a5["l"]],
             head="filled")
     c.arrow([d2["r"], a7["l"]], head="filled")
     c.text(60, 100, "[нет]", size=6.6)
