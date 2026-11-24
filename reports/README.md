@@ -35,8 +35,18 @@ python3 tools/fig_dfd.py       # DFD
 python3 tools/fig_idef3.py     # IDEF3
 python3 tools/fig_model.py     # оргструктура, IDEF1X
 python3 tools/fig_uml.py       # UML
-cd tools && python3 -c "import rep_a, rep_b, rep_c; ..."   # сборка DOCX
+cd tools && python3 -c "
+import rep_a, rep_b, rep_c, inspect
+for m in (rep_a, rep_b, rep_c):
+    for name, f in inspect.getmembers(m, inspect.isfunction):
+        if f.__module__ == m.__name__ and not name.startswith('_'):
+            f()
+"                               # сборка всех 13 DOCX
 ```
+
+Сначала рисунки (PNG в `reports/assets`), затем DOCX — отчёты вставляют
+готовые PNG. Ширина любой картинки при вставке ограничена 16,2 см — это
+ширина полосы набора при полях 3/1,5/2/2 см.
 
 `tools/notation.py` — библиотека нотаций, `tools/docx_report.py` — сборка
 документа (Times New Roman 14, интервал 1,5, поля 3/1,5/2/2 см, нумерация
