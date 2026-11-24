@@ -24,10 +24,7 @@ PAGE_W_CM = 16.2
 # холст печатается в ширину 16,2 см, поэтому кегль уменьшается до печатного
 FONT_SCALE = 0.78
 
-REPORTS = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                       "reports")
-OUT_DIR = os.path.join(REPORTS, "отчёт")        # PNG — как схемы выглядят
-VSDX_DIR = os.path.join(REPORTS, "сделано")     # .vsdx — редактируемые схемы Visio
+import layout  # раскладка файлов по папкам практических работ
 
 
 # ----------------------------------------------------------------------------
@@ -202,17 +199,15 @@ class Canvas:
 
     # ---------------- сохранение ----------------
     def save(self, name, pad=None, vector=True):
-        """Сохранить схему: PNG в reports/отчёт и .vsdx в reports/сделано."""
-        os.makedirs(OUT_DIR, exist_ok=True)
+        """Сохранить схему в папку своей работы: PNG + .vsdx для Visio."""
         base = name[:-4] if name.endswith(".png") else name
-        path = os.path.join(OUT_DIR, base + ".png")
+        path = layout.ensure(layout.png(base))
         self.fig.savefig(path, dpi=self.fig.dpi, facecolor="white",
                          bbox_inches="tight", pad_inches=0.15)
         if vector:
             try:
                 import vsdx_export
-                os.makedirs(VSDX_DIR, exist_ok=True)
-                vsdx_export.export(self, os.path.join(VSDX_DIR, base + ".vsdx"))
+                vsdx_export.export(self, layout.ensure(layout.vsdx(base)))
             except Exception as exc:      # noqa: BLE001
                 print("[vsdx] %s: %s" % (base, exc))
         plt.close(self.fig)

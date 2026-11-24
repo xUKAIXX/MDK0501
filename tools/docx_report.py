@@ -17,8 +17,7 @@ from docx.oxml.ns import qn
 from docx.shared import Cm, Pt, RGBColor
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ASSETS = os.path.join(ROOT, "reports", "отчёт")
-OUT = os.path.join(ROOT, "reports", "сделано")
+import layout
 
 FONT = "Times New Roman"
 MAX_IMAGE_CM = 16.2
@@ -131,7 +130,7 @@ class Report:
             _set_font(p.add_run(f"{i}. {it}"), 14)
 
     def image(self, name, caption, width_cm=16.0):
-        path = os.path.join(ASSETS, name if name.endswith(".png") else name + ".png")
+        path = layout.png(name[:-4] if name.endswith(".png") else name)
         if not os.path.exists(path):
             raise FileNotFoundError(path)
         # ширина полосы набора при полях 3 / 1,5 см и формате A4 — 16,5 см
@@ -275,7 +274,7 @@ class Report:
             self.p(a)
 
     def save(self, name):
-        os.makedirs(OUT, exist_ok=True)
-        path = os.path.join(OUT, name)
+        path = os.path.join(layout.practice_dir(name), name)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
         self.doc.save(path)
         return path

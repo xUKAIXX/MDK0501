@@ -5,7 +5,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-ASSETS = os.path.join(ROOT, "reports", "отчёт")
+import layout
 
 EXAMPLES = [
     ("idef0_example_context", "IDEF0 · контекст A-0 (пример)"),
@@ -59,7 +59,7 @@ def _font(size, bold=False):
 def sheet(items, title, out):
     tiles = []
     for key, cap in items:
-        im = Image.open(os.path.join(ASSETS, key + ".png")).convert("RGB")
+        im = Image.open(layout.png(key)).convert("RGB")
         k = COL_W / im.width
         im = im.resize((COL_W, max(1, round(im.height * k))), Image.LANCZOS)
         tiles.append((im, cap))
@@ -97,7 +97,8 @@ def sheet(items, title, out):
 
 
 if __name__ == "__main__":
-    out_dir = ASSETS
+    out_dir = os.path.join(ROOT, "reports")
+    os.makedirs(out_dir, exist_ok=True)
     sheet(EXAMPLES, "Схемы: примеры из методических указаний",
           os.path.join(out_dir, "предпросмотр_1_примеры.png"))
     sheet(VARIANTS, "Схемы: вариант 3 «Агентство недвижимости»",
