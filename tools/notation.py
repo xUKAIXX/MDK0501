@@ -199,11 +199,23 @@ class Canvas:
                         ec=color, fc=color, zorder=4)
 
     # ---------------- сохранение ----------------
-    def save(self, name, pad=None):
+    def save(self, name, pad=None, vector=True):
+        """Сохранить схему: всегда PNG, плюс PDF и SVG (вектор для Visio/Word)."""
         os.makedirs(OUT_DIR, exist_ok=True)
-        path = os.path.join(OUT_DIR, name if name.endswith(".png") else name + ".png")
+        base = name[:-4] if name.endswith(".png") else name
+        path = os.path.join(OUT_DIR, base + ".png")
         self.fig.savefig(path, dpi=self.fig.dpi, facecolor="white",
                          bbox_inches="tight", pad_inches=0.15)
+        if vector:
+            try:
+                import vsdx_export
+                vsdx_export.export(self, os.path.join(OUT_DIR, "vsdx", base + ".vsdx"))
+            except Exception as exc:      # noqa: BLE001
+                print("[vsdx] %s: %s" % (base, exc))
+            for ext in ("pdf", "svg"):
+                self.fig.savefig(os.path.join(OUT_DIR, base + "." + ext),
+                                 facecolor="white", bbox_inches="tight",
+                                 pad_inches=0.15)
         plt.close(self.fig)
         return path
 
