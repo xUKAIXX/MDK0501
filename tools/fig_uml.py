@@ -37,11 +37,11 @@ def uc_example():
     # ассоциации «актор — прецедент»: общая шина на каждого актора
     def assoc(ap, bus, ucs):
         ys = [u[1] for u in ucs]
-        c.ax.plot([ap[0], bus], [ap[1], ap[1]], color="black", lw=1.0, zorder=2)
+        c.ax.plot([ap[0], bus], [ap[1], ap[1]], color=THEME_LINE, lw=1.0, zorder=2)
         c.ax.plot([bus, bus], [min(ys + [ap[1]]), max(ys + [ap[1]])],
-                  color="black", lw=1.0, zorder=2)
+                  color=THEME_LINE, lw=1.0, zorder=2)
         for u in ucs:
-            c.ax.plot([bus, u[0]], [u[1], u[1]], color="black", lw=1.0, zorder=2)
+            c.ax.plot([bus, u[0]], [u[1], u[1]], color=THEME_LINE, lw=1.0, zorder=2)
 
     assoc((16, 25.6), 31, [uc1["l"], uc2["l"]])
     assoc((16, 61.6), 26, [uc3["l"], uc4["l"]])
@@ -81,11 +81,11 @@ def uc_variant():
     def assoc(ap, bus, ucs):
         """Шина: актёр → вертикаль на bus → горизонтали в варианты."""
         ys = [u[1] for u in ucs]
-        c.ax.plot([ap[0], bus], [ap[1], ap[1]], color="black", lw=1.0, zorder=2)
+        c.ax.plot([ap[0], bus], [ap[1], ap[1]], color=THEME_LINE, lw=1.0, zorder=2)
         c.ax.plot([bus, bus], [min(ys + [ap[1]]), max(ys + [ap[1]])],
-                  color="black", lw=1.0, zorder=2)
+                  color=THEME_LINE, lw=1.0, zorder=2)
         for u in ucs:
-            c.ax.plot([bus, u[0]], [u[1], u[1]], color="black", lw=1.0, zorder=2)
+            c.ax.plot([bus, u[0]], [u[1], u[1]], color=THEME_LINE, lw=1.0, zorder=2)
 
     # слева: Собственник, Клиент, Агент
     assoc((18, uc1["l"][1]), 35, [uc1["l"]])
@@ -148,21 +148,21 @@ def class_example():
 
     # Заявка — Клиент: ассоциация * — 1 с ролями
     c.ax.plot([kl["r"][0], za["l"][0]], [kl["r"][1] + 4, za["l"][1] + 8],
-              color="black", lw=1.0, zorder=1)
+              color=THEME_LINE, lw=1.0, zorder=1)
     c.text(kl["r"][0] + 5, kl["r"][1] + 7, "*", size=8)
     c.text(za["l"][0] - 5, za["l"][1] + 4, "1", size=8)
     c.text(kl["r"][0] + 9, kl["r"][1] + 11, "клиент", size=6.2, italic=True)
     c.text(za["l"][0] - 12, za["l"][1] + 14, "заявки", size=6.2, italic=True)
 
     # Заявка ◆— Комментарий: композиция 1 — *
-    c.ax.plot([za["r"][0], km["l"][0]], [za["r"][1], km["l"][1]], color="black",
+    c.ax.plot([za["r"][0], km["l"][0]], [za["r"][1], km["l"][1]], color=THEME_LINE,
               lw=1.0, zorder=1)
     d = 8
     c.poly([(za["r"][0], za["r"][1]),
             (za["r"][0] + d / 2, za["r"][1] - 2.4),
             (za["r"][0] + d, za["r"][1]),
             (za["r"][0] + d / 2, za["r"][1] + 2.4)],
-           fc="black", ec="black", zorder=5)
+           fc=THEME_LINE, ec=THEME_LINE, zorder=5)
     c.text(za["r"][0] + 10, za["r"][1] + 4, "1", size=8)
     c.text(km["l"][0] - 5, km["l"][1] - 5, "*", size=8)
     c.text(km["l"][0] - 26, km["l"][1] + 5, "комментарии", size=6.0,
@@ -174,7 +174,7 @@ def class_example():
            italic=True, ha="left")
 
     # Заявка — Категория: ассоциация * — 1
-    c.ax.plot([ka["r"][0], za["l"][0]], [ka["r"][1], za["b"][1]], color="black",
+    c.ax.plot([ka["r"][0], za["l"][0]], [ka["r"][1], za["b"][1]], color=THEME_LINE,
               lw=1.0, zorder=1)
     c.text(ka["r"][0] + 2, ka["r"][1] - 4, "1", size=8, ha="left")
     c.text(ka["r"][0] + 5, ka["r"][1] + 5, "категория", size=6.0, italic=True,
@@ -182,7 +182,7 @@ def class_example():
 
     # Заявка — Исполнитель: ассоциация * — 0..1
     c.ax.plot([za["r"][0], isp["t"][0]], [za["r"][1] + 6, isp["t"][1]],
-              color="black", lw=1.0, zorder=1)
+              color=THEME_LINE, lw=1.0, zorder=1)
     c.text(za["r"][0] + 2, za["r"][1] + 10, "*", size=8, ha="left")
     c.text(isp["t"][0] - 6, isp["t"][1] - 5, "0..1", size=7, ha="right",
            bg="white")
@@ -190,7 +190,7 @@ def class_example():
            bg="white")
 
     # Назначение — класс-ассоциация (пунктирная линия к классу «Исполнитель»)
-    c.ax.plot([nz["t"][0], nz["t"][0]], [nz["t"][1], isp["b"][1]], color="black",
+    c.ax.plot([nz["t"][0], nz["t"][0]], [nz["t"][1], isp["b"][1]], color=THEME_LINE,
               lw=0.9, ls=(0, (3, 2)), zorder=0)
     c.text(nz["t"][0] - 3, nz["t"][1] - 5, "назначение", size=6.0, italic=True,
            ha="right", bg="white")
@@ -233,62 +233,62 @@ def class_variant():
                    ["+ провести()"])
 
     # 1. Собственник 1 — 1..* Объект
-    c.ax.plot([so["r"][0], ob["l"][0]], [so["r"][1], ob["l"][1]], color="black",
+    c.ax.plot([so["r"][0], ob["l"][0]], [so["r"][1], ob["l"][1]], color=THEME_LINE,
               lw=1.0, zorder=2)
     c.text(so["r"][0] + 2, so["r"][1] - 3.4, "1", size=7, ha="left")
     c.text(ob["l"][0] - 2, ob["l"][1] - 3.4, "1..*", size=7, ha="right")
 
     # 2. Объект 1 —— 0..* Заявка (вертикаль)
     c.ax.plot([ob["cx"] + 8, ob["cx"] + 8], [ob["b"][1], za["t"][1]],
-              color="black", lw=1.0, zorder=2)
+              color=THEME_LINE, lw=1.0, zorder=2)
     c.text(ob["cx"] + 12, ob["b"][1] + 4.5, "1", size=7, ha="left")
     c.text(za["t"][0] + 12, za["t"][1] - 4.0, "0..*", size=7, ha="left")
 
     # 3. Клиент 1 — 0..* Договор (вертикаль)
-    c.ax.plot([kl["cx"], do["cx"]], [kl["b"][1], do["t"][1]], color="black",
+    c.ax.plot([kl["cx"], do["cx"]], [kl["b"][1], do["t"][1]], color=THEME_LINE,
               lw=1.0, zorder=2)
     c.text(kl["cx"] + 3, kl["b"][1] + 6, "1", size=7, ha="left")
     c.text(do["cx"] + 3, do["t"][1] - 6, "0..*", size=7, ha="left")
 
     # 4. Клиент 0..* — 1 Заявка (диагональ)
-    c.ax.plot([kl["l"][0], 116], [kl["l"][1] + 6, kl["l"][1] + 6], color="black",
+    c.ax.plot([kl["l"][0], 116], [kl["l"][1] + 6, kl["l"][1] + 6], color=THEME_LINE,
               lw=1.0, zorder=1)
-    c.ax.plot([116, 116], [kl["l"][1] + 6, za["r"][1] + 6], color="black", lw=1.0,
+    c.ax.plot([116, 116], [kl["l"][1] + 6, za["r"][1] + 6], color=THEME_LINE, lw=1.0,
               zorder=1)
-    c.ax.plot([116, za["r"][0]], [za["r"][1] + 6, za["r"][1] + 6], color="black",
+    c.ax.plot([116, za["r"][0]], [za["r"][1] + 6, za["r"][1] + 6], color=THEME_LINE,
               lw=1.0, zorder=1)
     c.text(kl["l"][0] - 2, kl["l"][1] + 9, "1", size=7, ha="right")
     c.text(za["r"][0] + 2, za["r"][1] + 2.5, "0..*", size=7, ha="left")
 
     # 5. Объект ◇—— Показ (агрегация: целое — Объект)
     ax_ = ob["l"][0] + 8
-    c.ax.plot([ax_, ax_], [ob["b"][1], 50], color="black", lw=1.0, zorder=1)
-    c.ax.plot([ax_, 24], [50, 50], color="black", lw=1.0, zorder=1)
-    c.ax.plot([24, 24], [50, po["t"][1]], color="black", lw=1.0, zorder=1)
+    c.ax.plot([ax_, ax_], [ob["b"][1], 50], color=THEME_LINE, lw=1.0, zorder=1)
+    c.ax.plot([ax_, 24], [50, 50], color=THEME_LINE, lw=1.0, zorder=1)
+    c.ax.plot([24, 24], [50, po["t"][1]], color=THEME_LINE, lw=1.0, zorder=1)
     d = 8
     c.poly([(ax_, ob["b"][1] + d),
             (ax_ - 2.6, ob["b"][1] + d / 2),
             (ax_, ob["b"][1]),
             (ax_ + 2.6, ob["b"][1] + d / 2)],
-           fc="white", ec="black", lw=1.0, zorder=5)
+           fc=THEME_FILL, ec=THEME_LINE, lw=1.0, zorder=5)
     c.text(ax_ - 7, ob["b"][1] + d + 4, "1", size=7, ha="right")
     c.text(po["t"][0] + 6, po["t"][1] - 4, "0..*", size=7, ha="left")
 
     # 6. Заявка 1 —— 0..* Показ
-    c.ax.plot([za["l"][0], po["r"][0]], [za["l"][1], po["r"][1]], color="black",
+    c.ax.plot([za["l"][0], po["r"][0]], [za["l"][1], po["r"][1]], color=THEME_LINE,
               lw=1.0, zorder=1)
     c.text(za["l"][0] - 3, za["l"][1] - 4.5, "1", size=7, ha="right")
     c.text(po["r"][0] + 3, po["r"][1] - 4.5, "0..*", size=7, ha="left")
 
     # 7. Договор ◆—— Оплата (композиция)
-    c.ax.plot([do["cx"], op["cx"]], [do["b"][1], op["t"][1]], color="black",
+    c.ax.plot([do["cx"], op["cx"]], [do["b"][1], op["t"][1]], color=THEME_LINE,
               lw=1.0, zorder=2)
     d = 8
     c.poly([(do["cx"], do["b"][1]),
             (do["cx"] - 2.6, do["b"][1] + d / 2),
             (do["cx"], do["b"][1] + d),
             (do["cx"] + 2.6, do["b"][1] + d / 2)],
-           fc="black", ec="black", lw=1.0, zorder=5)
+           fc=THEME_LINE, ec=THEME_LINE, lw=1.0, zorder=5)
     c.text(do["cx"] + 4, do["b"][1] + d + 6, "1", size=7, ha="left")
     c.text(op["cx"] - 3, op["t"][1] - 4, "1..*", size=7, ha="right")
 
@@ -408,7 +408,7 @@ def activity_variant():
 # ==================================================== деятельность с дорожками
 def _lane(c, x, y, w, h, title, title_w=16):
     c.rect(x, y, w, h, lw=1.0, zorder=1)
-    c.ax.plot([x + title_w, x + title_w], [y, y + h], color="black", lw=1.0,
+    c.ax.plot([x + title_w, x + title_w], [y, y + h], color=THEME_LINE, lw=1.0,
               zorder=3)
     c.text(x + title_w / 2, y + h / 2, title, size=7.6, bold=True, rotation=90)
     return x + title_w
@@ -425,7 +425,7 @@ def activity_lanes_example():
     xs = [lx + lane_w * i for i in range(3)]
     for i, t in enumerate(("Клиент", "Менеджер", "Исполнитель")):
         c.rect(xs[i], top, lane_w, bot - top, lw=1.0, zorder=1)
-        c.ax.plot([xs[i], xs[i] + lane_w], [top + 8, top + 8], color="black",
+        c.ax.plot([xs[i], xs[i] + lane_w], [top + 8, top + 8], color=THEME_LINE,
                   lw=0.9, zorder=4)
         c.text(xs[i] + lane_w / 2, top + 4, t, size=7.4, bold=True)
 
@@ -507,7 +507,7 @@ def activity_lanes_variant():
     c.text(76, 62, "[документов нет]", size=5.8, ha="left")
     c.arrow([a3["t"], (122, 40), (122, 22), (26, 22), (26, a1["l"][1]),
              a1["l"]], head="filled")
-    c.ax.plot([8 + 18, 8 + 18], [18, 124], color="black", lw=1.0, zorder=6)
+    c.ax.plot([8 + 18, 8 + 18], [18, 124], color=THEME_LINE, lw=1.0, zorder=6)
     c.text(28, 39, "повторно", size=5.8, italic=True, ha="left")
     # [документы есть] → «Оформить договор» (юрист)
     c.arrow([d1["b"], (50, a4["t"][1])], head="filled")
@@ -555,7 +555,7 @@ def state_example():
             head="filled")
     c.text(148, 42, "начать", size=6.2, ha="left")
     # начальное псевдосостояние внутри составного
-    c.circle(70, 70.5, 1.4, fc="black", ec="black")
+    c.circle(70, 70.5, 1.4, fc=THEME_LINE, ec=THEME_LINE)
     c.arrow([(71.4, 70.5), (v1["l"][0], 70.5)])
     # внутренние переходы
     c.arrow([(95, v1["b"][1]), (95, v2["t"][1])])
@@ -641,7 +641,7 @@ def seq_diagram(c, objects, messages, w=150, top=18, step=7.0, title=""):
             c.rect(x - 13, top - 8, 26, 8)
             c.text(x, top - 4, label, size=7.4)
         c.ax.plot([x, x], [top + 2, top + step * len(messages) + 12],
-                  color="black", lw=0.7, ls=(0, (5, 3)), zorder=1)
+                  color=THEME_LINE, lw=0.7, ls=(0, (5, 3)), zorder=1)
     y = top + 8
     for (i, j, text, kind) in messages:
         x1, x2 = objects[i][0], objects[j][0]
@@ -673,7 +673,7 @@ def seq_example():
     top = 18 + 8 + 7 * len(msgs) - 12
     c.rect(34, top, 96, 12, lw=0.9, ls="-", fc="none")
     c.poly([(34, top), (44, top), (44, top + 3.5), (39, top + 5), (34, top + 3.5)],
-           fc="white", ec="black", lw=0.8, zorder=4)
+           fc=THEME_FILL, ec=THEME_LINE, lw=0.8, zorder=4)
     c.text(39, top + 1.8, "alt", size=6.4, zorder=5)
     c.text(90, top + 4, "[данные верны] / [есть ошибки]", size=6.4)
     return c.save("sequence_example")
@@ -723,12 +723,12 @@ def comm_example():
     o_a = obj(*app, ":Заявка")
     o_m = obj(*men, "Менеджер", True)
 
-    c.ax.plot([o_k["r"][0], o_f["l"][0]], [k[1], f[1]], color="black", lw=1)
-    c.ax.plot([o_f["r"][0], o_a["l"][0]], [f[1], app[1]], color="black", lw=1)
+    c.ax.plot([o_k["r"][0], o_f["l"][0]], [k[1], f[1]], color=THEME_LINE, lw=1)
+    c.ax.plot([o_f["r"][0], o_a["l"][0]], [f[1], app[1]], color=THEME_LINE, lw=1)
     c.ax.plot([o_k["r"][0] + 2, o_m["l"][0] - 2], [k[1] + 2, men[1] - 2],
-              color="black", lw=1, ls=(0, (4, 2)))
+              color=THEME_LINE, lw=1, ls=(0, (4, 2)))
     c.ax.plot([o_a["l"][0], o_m["r"][0] - 4], [app[1] + 4, men[1] - 4],
-              color="black", lw=1)
+              color=THEME_LINE, lw=1)
 
     c.text(44, 60, "1: открыть()", size=6.4, rotation=-32)
     c.text(88, 60, "2: создать()", size=6.4, rotation=32)
@@ -762,11 +762,11 @@ def comm_variant():
     o_dg = obox(*dg, ":Договор", 34)
     o_bd = obox(*bd, ":БД", 22)
 
-    c.ax.plot([k[0] + 2, a[0] - 2], [k[1] + 2, a[1] - 2], color="black", lw=1)
-    c.ax.plot([a[0] + 6, o_ai["l"][0]], [a[1] - 2, ai[1] - 2], color="black", lw=1)
-    c.ax.plot([a[0] + 6, o_dg["l"][0]], [a[1] + 4, dg[1] + 4], color="black", lw=1)
-    c.ax.plot([o_ai["r"][0], o_bd["l"][0]], [ai[1], bd[1]], color="black", lw=1)
-    c.ax.plot([o_dg["r"][0], o_bd["l"][0]], [dg[1], bd[1]], color="black", lw=1)
+    c.ax.plot([k[0] + 2, a[0] - 2], [k[1] + 2, a[1] - 2], color=THEME_LINE, lw=1)
+    c.ax.plot([a[0] + 6, o_ai["l"][0]], [a[1] - 2, ai[1] - 2], color=THEME_LINE, lw=1)
+    c.ax.plot([a[0] + 6, o_dg["l"][0]], [a[1] + 4, dg[1] + 4], color=THEME_LINE, lw=1)
+    c.ax.plot([o_ai["r"][0], o_bd["l"][0]], [ai[1], bd[1]], color=THEME_LINE, lw=1)
+    c.ax.plot([o_dg["r"][0], o_bd["l"][0]], [dg[1], bd[1]], color=THEME_LINE, lw=1)
 
     c.text(42, 76, "1: подать заявку()", size=6.2, rotation=-22)
     c.text(90, 72, "2: зарегистрировать()", size=6.2, rotation=-16)

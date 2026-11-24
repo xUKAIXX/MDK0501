@@ -66,17 +66,17 @@ def dfd_variant_context():
     st = dfd_store(c, 60, 76, 40, 10, "D1", "База объектов и заявок")
 
     c.arrow([e1["r"], (p["l"][0], 40)], label="Заявка на объект",
-            size=6.4, label_at=(46, 22), label_bg="white")
+            size=6.4, label_at=(46, 22), label_bg="#ffffff")
     c.arrow([e2["r"], (p["l"][0], 54)], label="Заявка на подбор",
-            size=6.4, label_at=(46, 60), label_bg="white")
+            size=6.4, label_at=(46, 60), label_bg="#ffffff")
     c.arrow([p["r"], e3["l"]], label="Отчётность", size=6.4,
-            label_at=(113, 40), label_bg="white")
+            label_at=(113, 40), label_bg="#ffffff")
     # процесс → хранилище и хранилище → процесс: обе стрелки бьют в границу
     c.arrow([(p["cx"] - 6, p["b"][1]), (st["cx"] - 7, st["t"][1])],
             label="Данные объекта", size=6.2, label_at=(70, 70),
-            label_bg="white")
+            label_bg="#ffffff")
     c.arrow([(st["cx"] + 7, st["t"][1]), (p["cx"] + 6, p["b"][1])],
-            label="Подборки", size=6.2, label_at=(98, 70), label_bg="white")
+            label="Подборки", size=6.2, label_at=(98, 70), label_bg="#ffffff")
     return c.save("dfd_variant_context")
 
 
@@ -100,29 +100,29 @@ def dfd_variant_level1():
 
     # внешние сущности
     c.arrow([e1["r"], p1["l"]], label="Заявка", size=5.8, label_at=(37, 27),
-            label_bg="white")
+            label_bg="#ffffff")
     c.arrow([e2["r"], p3["l"]], label="Заявка\nна подбор", size=5.6,
-            label_at=(37, 75), label_bg="white")
+            label_at=(37, 75), label_bg="#ffffff")
     # основная цепочка процессов
     c.arrow([p1["r"], p2["l"]], label="Карточка\nобъекта", size=5.6,
-            label_at=(94, 25), label_bg="white")
+            label_at=(94, 25), label_bg="#ffffff")
     c.arrow([p3["r"], p4["l"]], label="Варианты", size=5.8, label_at=(94, 75),
-            label_bg="white")
+            label_bg="#ffffff")
     c.arrow([p4["r"], (168, p4["r"][1]), (168, p5["b"][1])],
-            label="Договор, акт", size=5.6, label_at=(168, 82), label_bg="white")
+            label="Договор, акт", size=5.6, label_at=(168, 82), label_bg="#ffffff")
     c.arrow([p5["t"], e3["b"]], label="Отчёты", size=5.8, label_at=(171, 31),
-            label_ha="left", label_bg="white")
+            label_ha="left", label_bg="#ffffff")
     # хранилища
     c.arrow([(60, p1["b"][1]), (60, d1["t"][1])], label="Объект", size=5.6,
-            label_at=(63, 41), label_ha="left", label_bg="white")
+            label_at=(63, 41), label_ha="left", label_bg="#ffffff")
     c.arrow([(p2["b"][0] - 4, p2["b"][1]), (80, d1["t"][1])],
-            label="Цена", size=5.6, label_at=(92, 41), label_bg="white")
+            label="Цена", size=5.6, label_at=(92, 41), label_bg="#ffffff")
     c.arrow([(56, d1["b"][1]), (56, p3["t"][1])], label="Объекты", size=5.6,
-            label_at=(59, 58), label_ha="left", label_bg="white")
+            label_at=(59, 58), label_ha="left", label_bg="#ffffff")
     c.arrow([(124, d2["t"][1]), (124, p2["b"][1])], label="Заявки", size=5.6,
-            label_at=(127, 41), label_ha="left", label_bg="white")
+            label_at=(127, 41), label_ha="left", label_bg="#ffffff")
     c.arrow([(120, p4["t"][1]), (120, d2["b"][1])], label="Запрос", size=5.6,
-            label_at=(117, 58), label_ha="right", label_bg="white")
+            label_at=(117, 58), label_ha="right", label_bg="#ffffff")
     c.text(c.w / 2, c.h - 4, "Потоки данных согласованы с контекстной диаграммой "
                              "(балансировка)", size=7, italic=True)
     return c.save("dfd_variant_level1")

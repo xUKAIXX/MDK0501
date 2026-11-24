@@ -22,13 +22,13 @@ def _tree(c, top, level1, level2=()):
     """top — руководитель; level1 — список (titles...); level2 — списки подчинённых."""
     y0, h0 = 14, 13
     # вертикаль от руководителя
-    c.ax.plot([top["b"][0], top["b"][0]], [top["b"][1], y0 - 6], color="black", lw=0.9)
+    c.ax.plot([top["b"][0], top["b"][0]], [top["b"][1], y0 - 6], color=THEME_LINE, lw=0.9)
     if not level1:
         return
     xs = [b["cx"] for b in level1]
-    c.ax.plot([min(xs), max(xs)], [y0 - 6, y0 - 6], color="black", lw=0.9)
+    c.ax.plot([min(xs), max(xs)], [y0 - 6, y0 - 6], color=THEME_LINE, lw=0.9)
     for b in level1:
-        c.ax.plot([b["cx"], b["cx"]], [y0 - 6, b["t"][1]], color="black", lw=0.9)
+        c.ax.plot([b["cx"], b["cx"]], [y0 - 6, b["t"][1]], color=THEME_LINE, lw=0.9)
 
 
 def org_example():
@@ -45,24 +45,24 @@ def org_example():
                     ("МИРОНОВ Л.И.",), size=7.0)
     eko = _org_box(c, 108, 60, 38, 12, "Экономист", ("МАТВЕЕВА С.К.",), size=7.0)
 
-    c.ax.plot([gen["b"][0], gen["b"][0]], [gen["b"][1], 32], color="black", lw=0.9)
-    c.ax.plot([ur["cx"], zam["cx"]], [32, 32], color="black", lw=0.9)
+    c.ax.plot([gen["b"][0], gen["b"][0]], [gen["b"][1], 32], color=THEME_LINE, lw=0.9)
+    c.ax.plot([ur["cx"], zam["cx"]], [32, 32], color=THEME_LINE, lw=0.9)
     for b in (ur, zam):
-        c.ax.plot([b["cx"], b["cx"]], [32, b["t"][1]], color="black", lw=0.9)
+        c.ax.plot([b["cx"], b["cx"]], [32, b["t"][1]], color=THEME_LINE, lw=0.9)
 
-    c.ax.plot([zam["b"][0], zam["b"][0]], [zam["b"][1], 56], color="black", lw=0.9)
-    c.ax.plot([glav["cx"], eko["cx"]], [56, 56], color="black", lw=0.9)
+    c.ax.plot([zam["b"][0], zam["b"][0]], [zam["b"][1], 56], color=THEME_LINE, lw=0.9)
+    c.ax.plot([glav["cx"], eko["cx"]], [56, 56], color=THEME_LINE, lw=0.9)
     for b in (glav, eko):
-        c.ax.plot([b["cx"], b["cx"]], [56, b["t"][1]], color="black", lw=0.9)
+        c.ax.plot([b["cx"], b["cx"]], [56, b["t"][1]], color=THEME_LINE, lw=0.9)
 
     b1 = _org_box(c, 32, 82, 34, 11, "Бухгалтер", ("АСЕЕВА М.Ю.",), size=7.0)
     b2 = _org_box(c, 70, 82, 34, 11, "Финансист", ("БОЕВ А.А.",), size=7.0)
     b3 = _org_box(c, 108, 82, 34, 11, "Аналитик", ("БАСОВА Н.Н.",), size=7.0)
-    c.ax.plot([glav["b"][0], glav["b"][0]], [glav["b"][1], 78], color="black",
+    c.ax.plot([glav["b"][0], glav["b"][0]], [glav["b"][1], 78], color=THEME_LINE,
               lw=0.9)
-    c.ax.plot([b1["cx"], b3["cx"]], [78, 78], color="black", lw=0.9)
+    c.ax.plot([b1["cx"], b3["cx"]], [78, 78], color=THEME_LINE, lw=0.9)
     for b in (b1, b2, b3):
-        c.ax.plot([b["cx"], b["cx"]], [78, b["t"][1]], color="black", lw=0.9)
+        c.ax.plot([b["cx"], b["cx"]], [78, b["t"][1]], color=THEME_LINE, lw=0.9)
     return c.save("org_example")
 
 
@@ -80,10 +80,10 @@ def org_variant():
     d4 = _org_box(c, 95, 38, 28, 13, "Юридический\nотдел", ("юрист",), size=6.8)
     d5 = _org_box(c, 126, 38, 30, 13, "Бухгалтерия", ("бухгалтер",), size=7.2)
 
-    c.ax.plot([gen["b"][0], gen["b"][0]], [gen["b"][1], 34], color="black", lw=0.9)
-    c.ax.plot([d1["cx"], d5["cx"]], [34, 34], color="black", lw=0.9)
+    c.ax.plot([gen["b"][0], gen["b"][0]], [gen["b"][1], 34], color=THEME_LINE, lw=0.9)
+    c.ax.plot([d1["cx"], d5["cx"]], [34, 34], color=THEME_LINE, lw=0.9)
     for b in (d1, d2, d3, d4, d5):
-        c.ax.plot([b["cx"], b["cx"]], [34, b["t"][1]], color="black", lw=0.9)
+        c.ax.plot([b["cx"], b["cx"]], [34, b["t"][1]], color=THEME_LINE, lw=0.9)
 
     s1 = _org_box(c, 2, 68, 28, 12, "Старший агент", size=7.2)
     s2 = _org_box(c, 33, 68, 28, 12, "Агент по аренде", size=7.2)
@@ -91,7 +91,7 @@ def org_variant():
     s4 = _org_box(c, 95, 68, 28, 12, "Помощник\nюриста", size=6.8)
 
     for d, s in ((d1, s1), (d2, s2), (d3, s3), (d4, s4)):
-        c.ax.plot([d["cx"], d["cx"]], [d["b"][1], s["t"][1]], color="black",
+        c.ax.plot([d["cx"], d["cx"]], [d["b"][1], s["t"][1]], color=THEME_LINE,
                   lw=0.9)
 
     c.text(c.w / 2, c.h - 5,
@@ -105,7 +105,7 @@ def _idef1x(c, x, y, w, name, rows, key_rows=1, size=7.0, row_h=4.2, head_h=6.2)
     h = head_h + row_h * len(rows) + 1.2
     c.rect(x, y, w, h)
     c.ax.plot([x, x + w], [y + head_h + row_h * key_rows, y + head_h + row_h * key_rows],
-              color="black", lw=0.8)
+              color=THEME_LINE, lw=0.8)
     c.text(x + w / 2, y + head_h / 2, name, size=size + 1.2, bold=True, wrap=18)
     for i, r in enumerate(rows):
         c.text(x + 1.6, y + head_h + row_h * i + row_h / 2 + 0.3, r, size=size,
@@ -120,7 +120,7 @@ def _link(c, pts, kind="ident", cards=(), labels=()):
     """Связь IDEF1X по ломаной; на дочернем конце — чёрный кружок."""
     ls = "-" if kind == "ident" else (0, (4, 2))
     xs, ys = zip(*pts)
-    c.ax.plot(xs, ys, color="black", lw=0.9, ls=ls, zorder=2)
+    c.ax.plot(xs, ys, color=THEME_LINE, lw=0.9, ls=ls, zorder=2)
     for (x, y, dx, dy, txt) in cards:
         c.text(x + dx, y + dy, txt, size=7.2, ha="left" if dx >= 0 else "right")
     for (x, y, txt, ha) in labels:
@@ -272,11 +272,11 @@ def idef1x_physical():
     e = _idef1x(c, 108, 62, 56, "tbl_Contract",
                 ["ContractID AutoNumber (PK)", "ObjectID  Number (FK)",
                  "ClientID  Number (FK)", "DocDate   Date/Time", "Amount Currency"])
-    c.ax.plot([a["cx"], a["cx"]], [a["b"][1], d["t"][1]], color="black", lw=0.9)
-    c.circle(a["cx"], d["t"][1] + 1.7, 1.0, fc="black", ec="black", zorder=5)
+    c.ax.plot([a["cx"], a["cx"]], [a["b"][1], d["t"][1]], color=THEME_LINE, lw=0.9)
+    c.circle(a["cx"], d["t"][1] + 1.7, 1.0, fc=THEME_LINE, ec=THEME_LINE, zorder=5)
     c.text(a["cx"] + 2.5, d["t"][1] - 3, "1 : N", size=7)
-    c.ax.plot([b["cx"], b["cx"]], [b["b"][1], e["t"][1]], color="black", lw=0.9)
-    c.circle(b["cx"], e["t"][1] + 1.7, 1.0, fc="black", ec="black", zorder=5)
+    c.ax.plot([b["cx"], b["cx"]], [b["b"][1], e["t"][1]], color=THEME_LINE, lw=0.9)
+    c.circle(b["cx"], e["t"][1] + 1.7, 1.0, fc=THEME_LINE, ec=THEME_LINE, zorder=5)
     c.text(b["cx"] + 2.5, e["t"][1] - 3, "1 : N", size=7)
     c.text(c.w / 2, c.h - 4, "Типы данных назначены для целевой СУБД; связи "
                              "реализуются внешними ключами (1 : N)", size=7,

@@ -21,6 +21,13 @@ plt.rcParams["font.family"] = "DejaVu Sans"
 plt.rcParams["font.size"] = 9
 
 PAGE_W_CM = 16.2
+
+# оформление как у диаграмм из методички (Visio): блоки светло-голубые,
+# контур, текст и стрелки — тёмно-синие
+THEME_FILL = "#eef6ff"
+THEME_LINE = "#384c6b"
+THEME_TEXT = "#384c6b"
+LW = 0.9
 # холст печатается в ширину 16,2 см, поэтому кегль уменьшается до печатного
 FONT_SCALE = 0.78
 
@@ -46,8 +53,9 @@ class Canvas:
 
     # ---------------- текст ----------------
     def text(self, x, y, s, size=9, ha="center", va="center", bold=False,
-             italic=False, color="black", rotation=0, zorder=6, wrap=None,
+             italic=False, color=None, rotation=0, zorder=6, wrap=None,
              bg=None):
+        color = color or THEME_TEXT
         if wrap:
             s = self._wrap(s, wrap)
         self.ax.text(x, y, s, fontsize=size * FONT_SCALE, ha=ha, va=va,
@@ -73,7 +81,7 @@ class Canvas:
         return "\n".join(out)
 
     # ---------------- фигуры ----------------
-    def rect(self, x, y, w, h, ec="black", fc="white", lw=1.0, ls="-", zorder=3,
+    def rect(self, x, y, w, h, ec=THEME_LINE, fc=THEME_FILL, lw=LW, ls="-", zorder=3,
              rounded=0.0, hatch=None, alpha=1.0):
         if rounded:
             p = FancyBboxPatch((x, y), w, h,
@@ -86,18 +94,18 @@ class Canvas:
         self.ax.add_patch(p)
         return p
 
-    def ellipse(self, x, y, w, h, ec="black", fc="white", lw=1.0, ls="-", zorder=3):
+    def ellipse(self, x, y, w, h, ec=THEME_LINE, fc=THEME_FILL, lw=LW, ls="-", zorder=3):
         p = Ellipse((x + w / 2, y + h / 2), w, h, ec=ec, fc=fc, lw=lw, ls=ls,
                     zorder=zorder)
         self.ax.add_patch(p)
         return p
 
-    def circle(self, cx, cy, r, ec="black", fc="white", lw=1.0, zorder=3, fill=True):
+    def circle(self, cx, cy, r, ec=THEME_LINE, fc=THEME_FILL, lw=LW, zorder=3, fill=True):
         p = Circle((cx, cy), r, ec=ec, fc=fc if fill else "none", lw=lw, zorder=zorder)
         self.ax.add_patch(p)
         return p
 
-    def diamond(self, cx, cy, w, h, ec="black", fc="white", lw=1.0, zorder=3):
+    def diamond(self, cx, cy, w, h, ec=THEME_LINE, fc=THEME_FILL, lw=LW, zorder=3):
         pts = [(cx, cy - h / 2), (cx + w / 2, cy), (cx, cy + h / 2), (cx - w / 2, cy)]
         p = Polygon(pts, closed=True, ec=ec, fc=fc, lw=lw, zorder=zorder)
         self.ax.add_patch(p)
@@ -109,11 +117,12 @@ class Canvas:
         return p
 
     # ---------------- стрелки ----------------
-    def arrow(self, pts, head="filled", color="black", lw=1.0, ls="-",
+    def arrow(self, pts, head="filled", color=None, lw=LW, ls="-",
               label=None, label_at=None, label_dx=0, label_dy=0, size=8,
               label_ha="center", label_va="center", double=False, zorder=2,
               radius=None, curve=None, label_bg=None):
         """Ломаная со стрелкой на конце. pts — список (x, y)."""
+        color = color or THEME_LINE
         pts = [tuple(map(float, p)) for p in pts]
         if curve:
             self._curved(pts, head, color, lw, ls, zorder, curve)
@@ -176,7 +185,7 @@ class Canvas:
                         y1 - L * math.sin(ang) - W * math.cos(ang)),
                        (x1 - L * math.cos(ang) - W * math.sin(ang),
                         y1 - L * math.sin(ang) + W * math.cos(ang))],
-                      fc="white", ec=color, lw=lw, zorder=4)
+                      fc="#ffffff", ec=color, lw=lw, zorder=4)
         elif head in ("diamond", "diamond_filled"):
             d = L * 1.6
             cx, cy = x1 - d / 2 * math.cos(ang), y1 - d / 2 * math.sin(ang)
@@ -214,13 +223,54 @@ class Canvas:
         return path
 
 
+def text_w(c, s, size):
+    """Ширина строки в единицах схемы при данном кегле."""
+    t = c.ax.text(0, 0, s, fontsize=size * FONT_SCALE)
+    bb = t.get_window_extent(c.fig.canvas.get_renderer())
+    (x0, _), (x1, _) = c.ax.transData.inverted().transform(
+        [[bb.x0, bb.y0], [bb.x1, bb.y1]])
+    t.remove()
+    return abs(x1 - x0)
+
+
+def fit_label(c, x, y, s, max_w, size=5.4, ha="center", min_size=3.8, **kw):
+    """Подпись, которая гарантированно влезает в max_w по ширине.
+
+    Подбирается кегль и перенос строк: подпись стрелки не должна наезжать
+    на соседние блоки (как в диаграммах Visio из методички).
+    """
+    s = str(s)
+    size = float(size)
+    while size > min_size:
+        lines, cur = [], ""
+        ok = True
+        for word in s.split():
+            cand = (cur + " " + word).strip()
+            if text_w(c, cand, size) <= max_w:
+                cur = cand
+            elif cur:
+                lines.append(cur)
+                cur = word
+                if text_w(c, cur, size) > max_w:
+                    ok = False
+            else:
+                ok = False
+                break
+        if cur:
+            lines.append(cur)
+        if ok and all(text_w(c, ln, size) <= max_w for ln in lines):
+            return c.text(x, y, "\n".join(lines), size=size, ha=ha, **kw)
+        size -= 0.2
+    return c.text(x, y, s, size=min_size, ha=ha, **kw)
+
+
 # ============================================================================
 # IDEF0
 # ============================================================================
 def idef0_block(c, x, y, w, h, code, name, size=8.5, num_size=8, wrap=20):
     """Функциональный блок IDEF0. Возвращает словарь точек подключения."""
     c.rect(x, y, w, h, rounded=1.2)
-    c.text(x + w / 2, y + h / 2 - 1.5, name, size=size, wrap=wrap)
+    fit_label(c, x + w / 2, y + h / 2 - 1.5, name, w - 4.0, size=size)
     c.text(x + 2.2, y + h - 2.2, code, size=num_size, ha="left", va="center")
     return {
         "in": (x, y + h * 0.72),        # вход — левая грань
@@ -241,9 +291,9 @@ def idef0_frame(c, code="", title="", num=""):
     """Рамка листа IDEF0 (поле заголовка внизу)."""
     c.rect(1, 1, c.w - 2, c.h - 2, lw=1.2, fc="none", zorder=0)
     c.rect(1, c.h - 8, c.w - 2, 7, lw=1.0, fc="none", zorder=0)
-    c.ax.plot([c.w * 0.55, c.w * 0.55], [c.h - 8, c.h - 1], color="black", lw=0.8,
+    c.ax.plot([c.w * 0.55, c.w * 0.55], [c.h - 8, c.h - 1], color=THEME_LINE, lw=0.8,
               zorder=0)
-    c.ax.plot([c.w * 0.62, c.w * 0.62], [c.h - 8, c.h - 1], color="black", lw=0.8,
+    c.ax.plot([c.w * 0.62, c.w * 0.62], [c.h - 8, c.h - 1], color=THEME_LINE, lw=0.8,
               zorder=0)
     c.text(c.w * 0.28, c.h - 4.5, title, size=8, zorder=1)
     c.text(c.w * 0.585, c.h - 2.6, "УЗЕЛ:", size=6)
@@ -259,10 +309,10 @@ def dfd_process(c, x, y, w, h, num, name, size=8.5):
     """Процесс DFD в нотации Гейна-Сарсона: скруглённый прямоугольник
     с полосой номера сверху."""
     c.rect(x, y, w, h, rounded=1.6)
-    c.ax.plot([x + 0.6, x + w - 0.6], [y + 5.2, y + 5.2], color="black", lw=0.8,
+    c.ax.plot([x + 0.6, x + w - 0.6], [y + 5.2, y + 5.2], color=THEME_LINE, lw=0.8,
               zorder=3)
     c.text(x + w / 2, y + 2.6, num, size=7.5)
-    c.text(x + w / 2, y + 5.2 + (h - 5.2) / 2, name, size=size, wrap=17)
+    fit_label(c, x + w / 2, y + 5.2 + (h - 5.2) / 2, name, w - 4.0, size=size)
     return {"cx": x + w / 2, "cy": y + h / 2,
             "l": (x, y + h / 2), "r": (x + w, y + h / 2),
             "t": (x + w / 2, y), "b": (x + w / 2, y + h),
@@ -272,9 +322,9 @@ def dfd_process(c, x, y, w, h, num, name, size=8.5):
 def dfd_store(c, x, y, w, h, sid, name, size=8.5):
     """Накопитель данных в нотации Гейна-Сарсона: открытый слева прямоугольник."""
     c.ax.plot([x, x + w, x + w, x, x],
-              [y, y, y + h, y + h, y], color="black", lw=1.0, zorder=3,
+              [y, y, y + h, y + h, y], color=THEME_LINE, lw=1.0, zorder=3,
               solid_capstyle="butt")
-    c.ax.plot([x + 11, x + 11], [y, y + h], color="black", lw=0.9, zorder=3)
+    c.ax.plot([x + 11, x + 11], [y, y + h], color=THEME_LINE, lw=0.9, zorder=3)
     c.text(x + 5.5, y + h / 2, sid, size=7.5)
     c.text(x + 11 + (w - 11) / 2, y + h / 2, name, size=size, wrap=14)
     return {"l": (x, y + h / 2), "r": (x + w, y + h / 2),
@@ -295,7 +345,7 @@ def dfd_external(c, x, y, w, h, name, size=8.5):
 def idef3_uow(c, x, y, w, h, num, name, size=8.5):
     c.rect(x, y, w, h)
     c.text(x + 2, y + h - 3, num, size=7, ha="left")
-    c.text(x + w / 2, y + h / 2, name, size=size, wrap=15)
+    fit_label(c, x + w / 2, y + h / 2, name, w - 4.0, size=size)
     return {"l": (x, y + h / 2), "r": (x + w, y + h / 2),
             "t": (x + w / 2, y), "b": (x + w / 2, y + h),
             "cx": x + w / 2, "cy": y + h / 2}
@@ -329,8 +379,8 @@ def idef1x_entity(c, x, y, w, rows, name, key_rows=1, size=8, header_h=7,
     h = header_h + row_h * len(rows) + 1.5
     c.rect(x, y, w, h)
     c.ax.plot([x, x + w], [y + header_h + row_h * key_rows,
-                           y + header_h + row_h * key_rows], color="black", lw=0.8)
-    c.text(x + w / 2, y + header_h / 2, name, size=size, bold=True, wrap=18)
+                           y + header_h + row_h * key_rows], color=THEME_LINE, lw=0.8)
+    fit_label(c, x + w / 2, y + header_h / 2, name, w - 4.0, size=size, bold=True)
     for i, r in enumerate(rows):
         yy = y + header_h + row_h * i + row_h / 2 + 0.4
         c.text(x + 2, yy, r, size=size - 0.7, ha="left")
@@ -348,9 +398,9 @@ def uml_class(c, x, y, w, name, attrs=(), ops=(), size=7.8, attr_h=4.8,
     head_h = 6 if bold_stereotype is None else 9
     h = head_h + attr_h * max(len(attrs), 1) + attr_h * max(len(ops), 1) + 2
     c.rect(x, y, w, h)
-    c.ax.plot([x, x + w], [y + head_h, y + head_h], color="black", lw=0.9)
+    c.ax.plot([x, x + w], [y + head_h, y + head_h], color=THEME_LINE, lw=0.9)
     y_split = y + head_h + attr_h * max(len(attrs), 1)
-    c.ax.plot([x, x + w], [y_split, y_split], color="black", lw=0.9)
+    c.ax.plot([x, x + w], [y_split, y_split], color=THEME_LINE, lw=0.9)
     c.text(x + w / 2, y + head_h / 2, name, size=size + 0.4, bold=True, wrap=20)
     for i, a in enumerate(attrs):
         c.text(x + 1.6, y + head_h + attr_h * i + attr_h / 2 + 0.3, a,
@@ -367,12 +417,12 @@ def uml_class(c, x, y, w, name, attrs=(), ops=(), size=7.8, attr_h=4.8,
 def uml_actor(c, cx, cy, name, size=8, label_below=True):
     r = 2.2
     c.circle(cx, cy, r, lw=1.0)
-    c.ax.plot([cx, cx], [cy + r, cy + r + 5.5], color="black", lw=1.0, zorder=3)
+    c.ax.plot([cx, cx], [cy + r, cy + r + 5.5], color=THEME_LINE, lw=1.0, zorder=3)
     c.ax.plot([cx - 3.4, cx + 3.4], [cy + r + 3.4, cy + r + 3.4],
-              color="black", lw=1.0, zorder=3)
-    c.ax.plot([cx, cx - 3.2], [cy + r + 5.5, cy + r + 9.5], color="black", lw=1.0,
+              color=THEME_LINE, lw=1.0, zorder=3)
+    c.ax.plot([cx, cx - 3.2], [cy + r + 5.5, cy + r + 9.5], color=THEME_LINE, lw=1.0,
               zorder=3)
-    c.ax.plot([cx, cx + 3.2], [cy + r + 5.5, cy + r + 9.5], color="black", lw=1.0,
+    c.ax.plot([cx, cx + 3.2], [cy + r + 5.5, cy + r + 9.5], color=THEME_LINE, lw=1.0,
               zorder=3)
     if label_below:
         c.text(cx, cy + r + 11.5, name, size=size, wrap=14)
@@ -384,7 +434,7 @@ def uml_actor(c, cx, cy, name, size=8, label_below=True):
 
 def uml_usecase(c, x, y, w, h, name, size=8.2):
     c.ellipse(x, y, w, h)
-    c.text(x + w / 2, y + h / 2, name, size=size, wrap=15)
+    fit_label(c, x + w / 2, y + h / 2, name, w - 4.0, size=size)
     return {"l": (x, y + h / 2), "r": (x + w, y + h / 2),
             "t": (x + w / 2, y), "b": (x + w / 2, y + h),
             "cx": x + w / 2, "cy": y + h / 2}
@@ -392,7 +442,7 @@ def uml_usecase(c, x, y, w, h, name, size=8.2):
 
 def uml_action(c, x, y, w, h, name, size=8.2):
     c.rect(x, y, w, h, rounded=2.4)
-    c.text(x + w / 2, y + h / 2, name, size=size, wrap=17)
+    fit_label(c, x + w / 2, y + h / 2, name, w - 5.0, size=size)
     return {"l": (x, y + h / 2), "r": (x + w, y + h / 2),
             "t": (x + w / 2, y), "b": (x + w / 2, y + h),
             "cx": x + w / 2, "cy": y + h / 2}
@@ -401,7 +451,7 @@ def uml_action(c, x, y, w, h, name, size=8.2):
 def uml_state(c, x, y, w, h, name, size=8.4, inner=(), label_top=False):
     c.rect(x, y, w, h, rounded=2.6)
     if label_top:
-        c.ax.plot([x + 0.4, x + w - 0.4], [y + 6, y + 6], color="black", lw=0.8)
+        c.ax.plot([x + 0.4, x + w - 0.4], [y + 6, y + 6], color=THEME_LINE, lw=0.8)
         c.text(x + w / 2, y + 3, name, size=size, bold=True, wrap=18)
     else:
         c.text(x + w / 2, y + h / 2 - (len(inner) * 3.6), name, size=size,
@@ -414,27 +464,27 @@ def uml_state(c, x, y, w, h, name, size=8.4, inner=(), label_top=False):
 
 
 def uml_start(c, cx, cy, r=2.0):
-    c.circle(cx, cy, r, fc="black", ec="black")
+    c.circle(cx, cy, r, fc=THEME_LINE, ec=THEME_LINE)
     return {"c": (cx, cy), "l": (cx - r, cy), "r": (cx + r, cy),
             "t": (cx, cy - r), "b": (cx, cy + r)}
 
 
 def uml_end(c, cx, cy, r=2.6):
-    c.circle(cx, cy, r, fc="white", ec="black")
-    c.circle(cx, cy, r * 0.55, fc="black", ec="black")
+    c.circle(cx, cy, r, fc="#ffffff", ec=THEME_LINE)
+    c.circle(cx, cy, r * 0.55, fc=THEME_LINE, ec=THEME_LINE)
     return {"c": (cx, cy), "l": (cx - r, cy), "r": (cx + r, cy),
             "t": (cx, cy - r), "b": (cx, cy + r)}
 
 
 def uml_fork(c, cx, cy, w=22, h=2.4):
-    c.rect(cx - w / 2, cy - h / 2, w, h, fc="black", ec="black")
+    c.rect(cx - w / 2, cy - h / 2, w, h, fc=THEME_LINE, ec=THEME_LINE)
     return {"l": (cx - w / 2, cy), "r": (cx + w / 2, cy), "c": (cx, cy),
             "t": (cx, cy - h / 2), "b": (cx, cy + h / 2)}
 
 
 def uml_note(c, x, y, w, h, text, size=7.6):
     c.poly([(x, y), (x + w - 4, y), (x + w, y + 4), (x + w, y + h), (x, y + h)],
-           fc="white", ec="black", lw=0.8, zorder=3)
-    c.ax.plot([x + w - 4, x + w - 4, x + w], [y, y + 4, y + 4], color="black",
+           fc="#ffffff", ec=THEME_LINE, lw=0.8, zorder=3)
+    c.ax.plot([x + w - 4, x + w - 4, x + w], [y, y + 4, y + 4], color=THEME_LINE,
               lw=0.8, zorder=4)
     c.text(x + w / 2, y + h / 2, text, size=size, wrap=18)
