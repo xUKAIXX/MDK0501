@@ -368,28 +368,45 @@ class VsdxPage:
 
 
 def export(canvas, out_path):
-    """Сохранить текущую схему как .vsdx (шейпы Visio, не картинка)."""
+    """Сохранить текущую схему как .vsdx (шейпы Visio, не картинка).
+
+    Фигуры переносятся в том же порядке, в каком их рисует matplotlib
+    (по zorder): иначе залитые дорожки и блоки, добавленные позже, закрывают
+    линии связей — в Visio схема выглядела без стрелок.
+    """
     page = VsdxPage(canvas)
 
-    # 1. линии и ломаные
-    for line in canvas.ax.lines:
-        if not isinstance(line, Line2D):
-            continue
-        xs, ys = line.get_xdata(), line.get_ydata()
-        if len(xs) < 2:
-            continue
-        page.add_path(list(zip(xs, ys)),
-                      fill=None,
-                      line=_hex(line.get_color(), "#000000"),
-                      lw=max(line.get_linewidth(), 0.2),
-                      pattern=_dash_pattern(line.get_linestyle()),
-                      closed=False)
+    items = []
+    for i, line in enumerate(canvas.ax.lines):
+        if isinstance(line, Line2D):
+            items.append((line.get_zorder(), 0, i, "line", line))
+    for i, patch in enumerate(canvas.ax.patches):
+        if isinstance(patch, Patch):
+            items.append((patch.get_zorder(), 1, i, "patch", patch))
+    for i, text in enumerate(canvas.ax.texts):
+        if isinstance(text, Text):
+            items.append((text.get_zorder(), 2, i, "text", text))
+    items.sort(key=lambda t: (t[0], t[1], t[2]))
 
-    # 2. фигуры: эллипсы, прямоугольники, произвольные многоугольники
     heads = []
-    for patch in canvas.ax.patches:
-        if not isinstance(patch, Patch):
+    for _, _, _, kind, art in items:
+        if kind == "line":
+            xs, ys = art.get_xdata(), art.get_ydata()
+            if len(xs) < 2:
+                continue
+            page.add_path(list(zip(xs, ys)),
+                          fill=None,
+                          line=_hex(art.get_color(), "#000000"),
+                          lw=max(art.get_linewidth(), 0.2),
+                          pattern=_dash_pattern(art.get_linestyle()),
+                          closed=False)
             continue
+        if kind == "text":
+            if art.get_text().strip():
+                page.add_text(art)
+            continue
+
+        patch = art
         fill = _hex(patch.get_facecolor())
         line = _hex(patch.get_edgecolor())
         lw = max(patch.get_linewidth(), 0.2)
@@ -413,16 +430,11 @@ def export(canvas, out_path):
                 continue
             pts = [tuple(p) for p in poly]
             # маленький залитый чёрный треугольник — это наконечник стрелки
-            if fill == "#000000" and len(pts) <= 4:
+            if fill in ("#000000", "#384c6b") and len(pts) <= 4:
                 heads.append(pts)
                 continue
             page.add_path(pts, fill=fill, line=line, lw=lw, pattern=pattern,
                           closed=True)
-
-    # 3. подписи
-    for text in canvas.ax.texts:
-        if isinstance(text, Text) and text.get_text().strip():
-            page.add_text(text)
 
     page.attach_heads(heads)
     return page.build(out_path)
